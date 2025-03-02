@@ -1,0 +1,492 @@
+---
+title: "The Road to 270: Democratic Campaigning Strategy for the 2024 US General Election"
+author: "Anna Brown"
+date: "`r Sys.Date()`"
+output:
+     html_document:
+          toc: true
+          toc_depth: 2
+          toc_float: true
+          theme: cosmo
+          code_folding: hide
+---
+
+# INTRODUCTION
+### *The Democratic Presidential campaign **must** establish their strategy to secure electoral victory.*
+
+Previous research shows that voter turnout shapes election outcomes. When voter turnout is high, it often indicates a high level of engagement and enthusiasm among the electorate, which can lead to more representative results. Conversely, low voter turnout can skew outcomes, as it may reflect apathy, disenchantment, or barriers to participation among certain demographics. Elections with low turnout rates risk being decided by a smaller, potentially less diverse subset of the population, which can distort the democratic process. Furthermore, variations in voter turnout across different regions or demographic groups can significantly impact the final results, influencing everything from the composition of legislative bodies to the outcome of specific ballot measures or initiatives. Therefore, understanding and addressing factors that affect voter turnout is essential for ensuring fair and representative democratic elections.
+
+By analyzing voting patterns from the previous four National election cycles (2016-2022), the Democratic Presidential campaign can obtain valuable insight on key voter demographics, including voter turnout and preferences, which can help information strategic decisions regarding messaging, campaign outreach, and policy priorities to effectively engage and mobilize supporters in the upcoming election.
+
+Following the primary elections earlier this year, we are now certain that the 2024 Presidential Election will be a Biden-Trump rematch. While the political environment has changed since their previous face-off in 2020, we can gain valuable insight on general trends in among voter demographics. In a time of immense polarization where both candidates are are well-established incumbents, the Democratic campaign can not rely on vote flipping. *Therefore, with the U.S. General Election only about six months year away, **Democrats need to consolidate a strong voting base that will turn out to on election day if they want to ensure a win.***
+
+# METHODOLOGY
+Following each election, the Pew Research Center surveys U.S. adults online to study trends in voter turnout and choices. Using this survey data, I am analyzing subsets of voters with low voter turnout for general trends that may be expected to continue in 2024. I originally accessed this data on March 21, 2024.
+
+Variables in my (cleaned) dataset include:
+
+| Variable             | Description                                                    |
+|----------------------|----------------------------------------------------------------|
+| Type of Voter        | Categorical groups of surveyed voters, by key characteristics  |
+| Year                 | The year of the election                                       |
+| Type of Election     | The type of the election, either House of Reps or Presidential |
+| D Vote               | Percentage of vote received by Democratic Party                |
+| D Voter Share        | Percentage of all Democratic Party votes from Type of Voter    |
+| D-R Margin           | Difference between Democratic and Republican Party votes       |
+| Total Nonvoter Share | Percentage of all nonvoters from Type of Voter                 |
+| R Vote               | Percentage of vote received by Republican Party                |
+| R Voter Share        | Percentage of all Republican Party votes from Type of Voter    |
+| Total Nonvoter Share | Percentage of all voters from Type of Voter                    |
+
+The Pew Research Center's most recent report using this data can be found at [www.pewresearch.org](https://www.pewresearch.org/politics/2023/07/12/voter-turnout-2018-2022/){.btn .btn-primary}
+
+I originally accessed the survey data on March 21, 2024.
+
+## DATA CLEANING
+#### LOADING PACKAGES
+```{r message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(patchwork)
+library(DT)
+```
+#### IMPORT ORIGINAL DATA
+```{r}
+# Set the file path
+file_path <- "/Users/annabrown/Desktop/Final Project/Original Dataframes/2016-2022 Validated Voter Detailed Tables - Sheet 1.csv"
+
+# Import rows 4 to 174 of the CSV file into R
+df <- read.csv(file_path, skip = 3, nrows = 171)
+```
+#### GENERAL CLEANING
+```{r}
+data <- df %>% #Use dplyr piping to clean data
+  # Rename columns
+  rename(
+    "Type of Voter" = X,
+    "2022 D House Vote" = X2022.Democratic.House.vote..official.result.48..,
+    "2022 R House Vote" = X2022.Republican.House.vote..official.result.51..,
+    "2022 D-R House Margin" = X2022.Margin..Dem.Rep.,
+    "2020 D Pres Candidate Vote" = X2020.Biden.vote..official.result.51..,
+    "2020 R Pres Candidate Vote" = X2020.Trump.vote..official.result.47..,
+    "2020 D-R Pres Candidate Margin" = X2020.Margin..Biden.Trump.,
+    "2018 D House Vote" = X2018.Democratic.House.vote..official.result.53..,
+    "2018 R House Vote" = X2018.Republican.House.vote..official.result.44..,
+    "2018 D-R House Margin" = X2018.Margin..Dem.Rep.,
+    "2016 D Pres Candidate Vote" = X2016.Clinton.vote..official.result.48..,
+    "2016 R Pres Candidate Vote" = X2016.Trump.vote..official.result.46..,
+    "2016 D-R Pres Candidate Margin" = X2016.Margin..Clinton.Trump.,
+    "X14" = X2022.Vote.choice.margin.of.error......at.95..CI.,
+    "X15" = X2020.Vote.choice.margin.of.error......at.95..CI.,
+    "X16" = X2018.Vote.choice.margin.of.error......at.95..CI.,
+    "X17" = X2016.Vote.choice.margin.of.error......at.95..CI.,
+    "X18" = Group.as.a.share.of.all.2022.voters,
+    "X19" = Group.as.a.share.of.all.2020.voters,
+    "X20" = Group.as.a.share.of.all.2018.voters,
+    "X21" = Group.as.a.share.of.all.2016.voters,
+    "2022 R Voter Share" = Group.as.a.share.of.2022.Republican.voters,
+    "2022 D Voter Share" = Group.as.a.share.of.2022.Democratic.voters,
+    "2020 R Pres Candidate Voter Share" = Group.as.a.share.of.2020.Trump.voters,
+    "2020 D Pres Candidate Voter Share" = Group.as.a.share.of.2020.Biden.voters,
+    "2018 R Voter Share" = Group.as.a.share.of.2018.Republican.voters,
+    "2018 D Voter Share" = Group.as.a.share.of.2018.Democratic.voters,
+    "2016 R Pres Candidate Voter Share" = Group.as.a.share.of.2016.Trump.voters,
+    "2016 D Pres Candidate Voter Share" = Group.as.a.share.of.2016.Clinton.voters,
+    "2022 Total Voter Share" = Group.as.a.share.of.all.2022.voters.1,
+    "2022 Total Nonvoter Share" = Group.as.a.share.of.all.2022.nonvoters,
+    "2020 Total Voter Share" = Group.as.a.share.of.all.2020.voters.1,
+    "2020 Total Nonvoter Share" = Group.as.a.share.of.all.2020.nonvoters,
+    "2018 Total Voter Share" = Group.as.a.share.of.all.2018.voters.1,  
+    "2018 Total Nonvoter Share" = Group.as.a.share.of.all.2018.nonvoters,  
+    "2016 Total Voter Share" = Group.as.a.share.of.all.2016.voters.1,  
+    "2016 Total Nonvoter Share" = Group.as.a.share.of.all.2016.nonvoters,  
+    "X38" = X.1,  
+    "X39" = rep_18_22,  
+    "X40" = dem_18_22
+  ) %>%
+  # Remove unnecessary/duplicate columns
+  select(-c(X14:X21, X38:X40)) %>%
+  # Replace empty strings with NA
+  mutate(across(everything(), ~ifelse(. == "", NA, .))) %>%
+  # Replace dashes with NA
+  mutate(across(everything(), ~ifelse(. == "-", NA, .))) %>%
+  # Convert all column values to integers
+   mutate_at(vars(2:ncol(.)), as.integer) %>%
+ # Reorder columns alphabetically
+  select(sort(names(.))) %>%
+  select(all_of("Type of Voter"), everything())
+
+# Split original dataframe into its individual subsets:
+
+# Find indices of rows with all NA or empty values
+empty_row_indices <- which(apply(data, 1, function(x) all(is.na(x) | x == "")))
+
+# Initialize a list to store subsets of data
+subsets <- list()
+
+# Loop through each row in the data
+for (i in 1:nrow(data)) {
+  # Check if the current row is in the empty row indices
+  if (i %in% empty_row_indices) {
+    # If it's empty, store the next row's "Type of Voter" value as the current name
+    current_name <- as.character(data[i + 1, "Type of Voter"])
+  } else {
+    # If the row is not empty
+    if (!is.na(current_name)) {
+      # Extract the current row as a subset of data
+      subset_data <- data[i, , drop = FALSE]
+      # Check if the current name exists as a key in the subsets list
+      if (!(current_name %in% names(subsets))) {
+        # If not, add the subset data as a new list element
+        subsets[[current_name]] <- subset_data
+      } else {
+        # If yes, append the subset data to the existing list element
+        subsets[[current_name]] <- rbind(subsets[[current_name]], subset_data)
+      }
+    }
+  }
+}
+```
+#### VISUALIZATION 1 CLEANING
+```{r}
+gender_data <- rbind(subsets[["Gender"]], subsets[["Gender and race"]], subsets[["Gender and Marital"]], subsets[["Gender and education"]], subsets[["Gender and age"]]) 
+
+gender_data <- gender_data %>%
+  mutate(`Type of Voter` = ifelse(grepl("Gender", `Type of Voter`), NA, `Type of Voter`)) %>%
+  filter_all(any_vars(!is.na(.)))
+
+# Split the dataframe by election/year for individual cleaning
+data1 <- gender_data[, c("Type of Voter", "2016 D Pres Candidate Vote", "2016 D Pres Candidate Voter Share", 
+                  "2016 D-R Pres Candidate Margin", "2016 Total Nonvoter Share", 
+                  "2016 R Pres Candidate Vote", "2016 R Pres Candidate Voter Share", 
+                  "2016 Total Voter Share")]
+data2 <- gender_data[, c("Type of Voter", "2018 D House Vote", "2018 D Voter Share", 
+                  "2018 D-R House Margin", "2018 Total Nonvoter Share", 
+                  "2018 R House Vote", "2018 R Voter Share", 
+                  "2018 Total Voter Share")]
+
+data3 <- gender_data[, c("Type of Voter", "2020 D Pres Candidate Vote", "2020 D Pres Candidate Voter Share", 
+                  "2020 D-R Pres Candidate Margin", "2020 Total Nonvoter Share", 
+                  "2020 R Pres Candidate Vote", "2020 R Pres Candidate Voter Share", 
+                  "2020 Total Voter Share")]
+
+data4 <- gender_data[, c("Type of Voter", "2022 D House Vote", "2022 D Voter Share", 
+                  "2022 D-R House Margin", "2022 Total Nonvoter Share", 
+                  "2022 R House Vote", "2022 R Voter Share", 
+                  "2022 Total Voter Share")]
+
+# Add a "Type of Election" column
+data1 <- cbind(data1[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], 'Type of Election' = 'House', data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], 'Type of Election' = 'House', data4[, -1])
+
+# Remove type of election from all cells in the title row
+colnames(data1) <- gsub("Pres Candidate ", "", colnames(data1))
+colnames(data2) <- gsub("House ", "", colnames(data2))
+colnames(data3) <- gsub("Pres Candidate ", "", colnames(data3))
+colnames(data4) <- gsub("House ", "", colnames(data4))
+
+# Add a "Year" column
+data1 <- cbind(data1[, 1, drop = FALSE], Year = 2016, data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], Year = 2018, data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], Year = 2020, data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], Year = 2022, data4[, -1])
+
+# Remove year from all cells in the title row
+colnames(data1) <- gsub("2016 ", "", colnames(data1))
+colnames(data2) <- gsub("2018 ", "", colnames(data2))
+colnames(data3) <- gsub("2020 ", "", colnames(data3))
+colnames(data4) <- gsub("2022 ", "", colnames(data4))
+
+# Merge cleaned dataframes
+clean_gender_data <- rbind(data1, data2, data3, data4)
+
+# Subset the dataframe by gender from the "Type of Voter" column
+male_voters <- clean_gender_data[grepl("\\b(Men| men)\\b", clean_gender_data$`Type of Voter`, ignore.case = TRUE), ]
+female_voters <- clean_gender_data[grepl("Women", clean_gender_data$`Type of Voter`, ignore.case = TRUE), ]
+
+# Add a "Gender" column "Gender" to subset dataframes
+male_voters$Gender <- "Male"
+female_voters$Gender <- "Female"
+
+# Remove gender indicator from "Type of Voter" column in the subset dataframes
+male_voters$`Type of Voter` <- gsub("Men, ", "", male_voters$`Type of Voter`, ignore.case = TRUE)
+female_voters$`Type of Voter` <- gsub("Women, ", "", female_voters$`Type of Voter`, ignore.case = TRUE)
+
+# Replace remaining cells with "Total"
+male_voters$`Type of Voter`[male_voters$`Type of Voter` == "Men"] <- "Total"
+female_voters$`Type of Voter`[female_voters$`Type of Voter` == "Women"] <- "Total"
+
+gender_data_final <- rbind(male_voters, female_voters)
+gender_data_final <- gender_data_final %>%
+  select('Gender', everything())
+```
+#### VISUALIZATION 2 CLEANING
+```{r}
+age_data <- subsets[["Age (six-way)"]]
+age_data <- age_data %>%
+  mutate(`Type of Voter` = ifelse(grepl("Age", `Type of Voter`), NA, `Type of Voter`)) %>%
+  filter_all(any_vars(!is.na(.)))
+
+# Split the dataframe by election/year for individual cleaning
+data1 <- age_data[, c("Type of Voter", "2016 D Pres Candidate Vote", "2016 D Pres Candidate Voter Share", 
+                  "2016 D-R Pres Candidate Margin", "2016 Total Nonvoter Share", 
+                  "2016 R Pres Candidate Vote", "2016 R Pres Candidate Voter Share", 
+                  "2016 Total Voter Share")]
+data2 <- age_data[, c("Type of Voter", "2018 D House Vote", "2018 D Voter Share", 
+                  "2018 D-R House Margin", "2018 Total Nonvoter Share", 
+                  "2018 R House Vote", "2018 R Voter Share", 
+                  "2018 Total Voter Share")]
+
+data3 <- age_data[, c("Type of Voter", "2020 D Pres Candidate Vote", "2020 D Pres Candidate Voter Share", 
+                  "2020 D-R Pres Candidate Margin", "2020 Total Nonvoter Share", 
+                  "2020 R Pres Candidate Vote", "2020 R Pres Candidate Voter Share", 
+                  "2020 Total Voter Share")]
+
+data4 <- age_data[, c("Type of Voter", "2022 D House Vote", "2022 D Voter Share", 
+                  "2022 D-R House Margin", "2022 Total Nonvoter Share", 
+                  "2022 R House Vote", "2022 R Voter Share", 
+                  "2022 Total Voter Share")]
+
+# Add a "Type of Election" column
+data1 <- cbind(data1[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], 'Type of Election' = 'House', data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], 'Type of Election' = 'House', data4[, -1])
+
+# Remove type of election from all cells in the title row
+colnames(data1) <- gsub("Pres Candidate ", "", colnames(data1))
+colnames(data2) <- gsub("House ", "", colnames(data2))
+colnames(data3) <- gsub("Pres Candidate ", "", colnames(data3))
+colnames(data4) <- gsub("House ", "", colnames(data4))
+
+# Add a "Year" column
+data1 <- cbind(data1[, 1, drop = FALSE], Year = 2016, data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], Year = 2018, data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], Year = 2020, data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], Year = 2022, data4[, -1])
+
+# Remove year from all cells in the title row
+colnames(data1) <- gsub("2016 ", "", colnames(data1))
+colnames(data2) <- gsub("2018 ", "", colnames(data2))
+colnames(data3) <- gsub("2020 ", "", colnames(data3))
+colnames(data4) <- gsub("2022 ", "", colnames(data4))
+
+# Merge cleaned dataframes
+clean_age_data <- rbind(data1, data2, data3, data4)
+```
+#### VISUALIZATION 3 CLEANING
+```{r}
+education_data <- subsets[["Education"]]
+education_data <- education_data %>%
+  mutate(`Type of Voter` = ifelse(grepl("Education", `Type of Voter`), NA, `Type of Voter`)) %>%
+  filter_all(any_vars(!is.na(.)))
+
+# Split the dataframe by election/year for individual cleaning
+data1 <- education_data[, c("Type of Voter", "2016 D Pres Candidate Vote", "2016 D Pres Candidate Voter Share", 
+                  "2016 D-R Pres Candidate Margin", "2016 Total Nonvoter Share", 
+                  "2016 R Pres Candidate Vote", "2016 R Pres Candidate Voter Share", 
+                  "2016 Total Voter Share")]
+data2 <- education_data[, c("Type of Voter", "2018 D House Vote", "2018 D Voter Share", 
+                  "2018 D-R House Margin", "2018 Total Nonvoter Share", 
+                  "2018 R House Vote", "2018 R Voter Share", 
+                  "2018 Total Voter Share")]
+
+data3 <- education_data[, c("Type of Voter", "2020 D Pres Candidate Vote", "2020 D Pres Candidate Voter Share", 
+                  "2020 D-R Pres Candidate Margin", "2020 Total Nonvoter Share", 
+                  "2020 R Pres Candidate Vote", "2020 R Pres Candidate Voter Share", 
+                  "2020 Total Voter Share")]
+
+data4 <- education_data[, c("Type of Voter", "2022 D House Vote", "2022 D Voter Share", 
+                  "2022 D-R House Margin", "2022 Total Nonvoter Share", 
+                  "2022 R House Vote", "2022 R Voter Share", 
+                  "2022 Total Voter Share")]
+
+# Add a "Type of Election" column
+data1 <- cbind(data1[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], 'Type of Election' = 'House', data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], 'Type of Election' = 'Presidential', data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], 'Type of Election' = 'House', data4[, -1])
+
+# Remove type of election from all cells in the title row
+colnames(data1) <- gsub("Pres Candidate ", "", colnames(data1))
+colnames(data2) <- gsub("House ", "", colnames(data2))
+colnames(data3) <- gsub("Pres Candidate ", "", colnames(data3))
+colnames(data4) <- gsub("House ", "", colnames(data4))
+
+# Add a "Year" column
+data1 <- cbind(data1[, 1, drop = FALSE], Year = 2016, data1[, -1])
+data2 <- cbind(data2[, 1, drop = FALSE], Year = 2018, data2[, -1])
+data3 <- cbind(data3[, 1, drop = FALSE], Year = 2020, data3[, -1])
+data4 <- cbind(data4[, 1, drop = FALSE], Year = 2022, data4[, -1])
+
+# Remove year from all cells in the title row
+colnames(data1) <- gsub("2016 ", "", colnames(data1))
+colnames(data2) <- gsub("2018 ", "", colnames(data2))
+colnames(data3) <- gsub("2020 ", "", colnames(data3))
+colnames(data4) <- gsub("2022 ", "", colnames(data4))
+
+# Merge cleaned dataframes
+clean_education_data <- rbind(data1, data2, data3, data4)
+```
+
+## TRENDS IN VOTER TURNOUT
+As evidenced by the chart below, voter turnout disparities are evident across racial, educational, and gender lines. Additionally, while there is some year-to-year variation, these trends have remained generally constant over the past four election cycles. In other words, voter turnout is *not* random.
+```{r}
+# Define the desired order of the legend items
+desired_order <- c("Total", "18-49", "50+", "Black, non-Hispanic", "White, non-Hispanic", "Hispanic", "some college or less", "college grad+", "not married", "married")
+
+# Define color scheme
+colors <- c("Total" = "#051224",
+            "18-49" = "#C6342F",
+            "50+" = "#F84947", 
+            "Black, non-Hispanic" = "#004AAD",
+            "White, non-Hispanic" = "#4689D0",
+            "Hispanic" = "#B1DFFC",
+            "some college or less" = "#808080",
+            "college grad+" = "#ADADAD",    
+            "not married" = "#7C4A7A",    
+            "married" = "#BA8CB9") 
+
+# Plot Total Nonvoter share per year, coloring by Type of Voter for female voters
+female_plot <- ggplot(female_voters, aes(x = Year, y = `Total Nonvoter Share`, color = factor(`Type of Voter`, levels = desired_order))) +
+  geom_line() +
+  labs(x = "Year", y = "Share of Nonvoters (%)", color = "Type of Voter") +
+  scale_color_manual(values = colors) +  # Apply color scheme
+  theme_minimal() +
+  theme(
+    text = element_text(family = "Georgia"),
+    legend.title = element_text(family = "Georgia", face = "bold", hjust = 0.5),
+    axis.title.x = element_text(face = "italic"),
+    axis.title.y = element_blank(),
+    panel.grid.major = element_blank(),  # Remove major grid lines
+    panel.grid.minor = element_blank(),   # Remove minor grid lines
+    plot.title = element_text(face = "italic", hjust = 0.5),  # Italicize and center the title
+    legend.position = "right",  # Adjust legend position
+    legend.box.background = element_rect(color = "black"),  # Add a box around the legend
+    legend.key.size = unit(0.5, "cm")  # Reduce legend size
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 2))) +  # Adjust legend size
+  ggtitle("Female Voter Population")  # Add title
+
+# Plot Total Nonvoter share per year, coloring by Type of Voter for male voters
+male_plot <- ggplot(male_voters, aes(x = Year, y = `Total Nonvoter Share`, color = factor(`Type of Voter`, levels = desired_order))) +
+  geom_line() +
+  labs(x = "Year", y = "Share of Nonvoters (%)", color = "Type of Voter") +
+  scale_color_manual(values = colors) +  # Apply political-type color scheme
+  theme_minimal() +
+  theme(
+    text = element_text(family = "Georgia"),
+    legend.title = element_text(family = "Georgia", face = "bold", hjust = 0.5),
+    axis.title.x = element_text(face = "italic"),
+    axis.title.y = element_text(face = "italic"),
+    panel.grid.major = element_blank(),  # Remove major grid lines
+    panel.grid.minor = element_blank(),   # Remove minor grid lines
+    plot.title = element_text(face = "italic", hjust = 0.5),  # Italicize and center the title
+    legend.position = "none"  # Remove legend
+  ) +
+  ggtitle("Male Voter Population")  # Add title
+
+# Combine plots with patchwork, setting male_plot on the left and female_plot on the right
+patch <- male_plot + female_plot +
+  plot_layout(ncol = 2)  # Arrange plots in 2 columns
+
+# Add overall title with Georgia font and bold
+patch <- patch + plot_annotation(
+  title = "Nonvoters in U.S. Elections, 2016-2022",
+  theme = theme(plot.title = element_text(family = "Georgia", face = "bold"))
+)
+
+# Display the patchwork
+patch
+```
+Recognizing these demographic trends, the Democratic campaign has a strategic opportunity to solidify its voter base by employing targeted campaign tactics aimed at identifying and mobilizing nonvoters within their constituency. If demographic groups that generally have not voted in elections previously can be motivated to vote for the Democratic candidate in 2024, then the Democratic campaign can secure a stronger voting base without flipping votes.
+
+Specifically, this chart identifies young and low-educated individuals as the two largest shares of nonvoters, especially within the female population. *How do these groups vote?* 
+
+## TRENDS IN LOW-EDUCATED VOTER PREFERENCES
+Voters with some college education or less have comprised the largest subgroup of nonvoters over the past four election cycles. However, voter turnout among this group did increase in 2022. 
+```{r warning=FALSE}
+# Filtering the data to include only voters with "Some college" or "HS or Less" education
+educ_subset <- clean_education_data %>%                 
+  filter(`Type of Voter` %in% c("HS or less","Some college")) %>%
+  # Calculating the percentage of "Other" votes
+  mutate(`Other Vote` = 100 - `D Vote` - `R Vote`) %>%
+  # Reshaping the data into longer format for plotting
+  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),  
+               names_to = "Party", values_to = "Votes") %>%
+  # Reordering the levels of the 'Party' factor variable
+  mutate(Party = factor(Party, levels = c("Other Vote", "D Vote", "R Vote")))
+
+# Plotting
+ggplot(educ_subset, aes(x = Year, y = Votes, fill = Party)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(data = subset(educ_subset, Party != "Other Vote"), aes(label = paste0(round(Votes), "%")), 
+            position = position_stack(vjust = 0.5), size = 3, color = "white", fontface = "bold", family = "Georgia") + # Change text color to white, make it bold, and set font to Georgia
+  facet_wrap(~`Type of Voter`, scales = "free_y", labeller = labeller(`Type of Voter` = c("HS or less" = "High School or Less", "Some college" = "Some College"))) +
+  labs(title = "Party Preferences of Low-Educated Voters, 2016-2022",
+       x = "Year", y = "Share of Votes (%)", fill = "Party") +
+  scale_x_continuous(breaks = seq(min(educ_subset$Year), max(educ_subset$Year), by = 2)) +  # Setting breaks on the x-axis to even years
+  scale_fill_manual(values = c("#ADADAD", "#004AAD", "#F84947"), labels = c("Other", "Democrat", "Republican")) +
+  theme_minimal() +
+  theme(text = element_text(family = "Georgia"),
+        plot.title = element_text(face = "bold", hjust = 0),  # Align title on the left margin
+        axis.title.x = element_text(face = "italic"),
+        axis.title.y = element_text(face = "italic"),
+        legend.title = element_text(face = "bold"),
+        strip.text = element_text(size = 12, color = "black", face = "italic"),
+        panel.grid.major = element_blank(),  # Remove major grid lines
+        panel.grid.minor = element_blank(),  # Remove minor grid lines
+        legend.box.background = element_rect(color = "black", size = 0.3))  # Add a box around the legend
+```
+Measured by the stacked bar chart above, these voters, especially those with High School education or less, primarily support the Republican party. However, while the Republican party does appear to be gaining in margins across each cycle, this trend remains competitive. Additionally, given the Republican party only recently obtained a substantial majority among low-educated voters, this could be because low-educated voters who tend to support Democratic candidates are not actually voting on election day. Therefore, engaging with this group more through campaigning may help shift the trend towards the Democrats’ favor.
+
+## TRENDS IN YOUNG VOTER PREFERENCES
+Meanwhile, young voters, the second largest subgroup of nonvoters, are Democratic supporters. Given the next Presidential Election is a 2020 rematch, the bar chart below displays voter shares each candidate received from this subgroup in their last competition.
+```{r}
+age_subset <- clean_age_data %>%                 
+  filter(`Type of Voter` %in% c("18-24", "25-29", "30-39", "40-49")) %>%
+  filter(`Year` %in% c("2020"))  %>%
+  # Calculating the percentage of "Other" votes
+  mutate(`Other Vote` = 100 - `D Vote` - `R Vote`) %>%
+  # Convert "D Vote" values to negative numbers
+  mutate(`D Vote` = -`D Vote`) %>%
+  # Reshaping the data into longer format for plotting
+  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),  
+               names_to = "Party", values_to = "Votes") %>%
+  # Reordering the levels of the 'Party' factor variable
+  mutate(Party = factor(Party, levels = c("Other Vote", "D Vote", "R Vote"))) %>%
+  # Add an "abs_votes" column with absolute values of "Votes"
+  mutate(abs_votes = abs(Votes))
+
+# Stacked horizontal bar chart
+ggplot(age_subset, aes(x = factor(`Type of Voter`), y = Votes, fill = Party)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = ifelse(Party %in% c("D Vote", "R Vote"), paste0(abs_votes, "%"), "")),
+            position = position_stack(vjust = 0.5), color = "white", fontface = "bold",
+            family = "Georgia") + # Specify the font family here
+  labs(title = "Presidential Candidate Preferences of Young Voters, 2020",
+       x = "Age of Voter",
+       y = "Share of Votes (%)",
+       fill = "Presidential Candidate") + # Changing the legend title
+  theme_minimal() +
+  theme(legend.position = "right",
+        text = element_text(family = "Georgia", face = "plain"),
+        axis.text = element_text(family = "Georgia", face = "plain"),
+        axis.title = element_text(family = "Georgia", face = "italic"),
+        axis.text.x = element_text(color = "white"), # Change the x-axis text color to white
+        legend.text = element_text(family = "Georgia", face = "plain"),
+        legend.title = element_text(family = "Georgia", face = "bold"),
+        panel.grid.major = element_blank(), # Remove major grid lines
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(family = "Georgia", face = "bold"),
+        legend.box.background = element_rect(color = "black", size = 0.3)) + # Add box around legend
+  coord_flip() +
+  scale_fill_manual(labels = c("Other", "Joe Biden", "Donald Trump"),
+                    values = c("Other Vote" = "#ADADAD", "D Vote" = "#004AAD", "R Vote" = "#F84947"))
+```
+Collectively, Democrats received majority support from all age groups between 18 and 49, however, their most overwhelming support came from newer voters — individuals likely voting in their first Presidential election — between 18 and 24 years old. By maintaing support from young voters through outreach programs, tailored messaging, and community organizing initiatives, the Democratic party can enhance voter participation, expand their voter base, and potentially tip the scales in their favor on election day.
+
+# CONCLUSION
+Across the last four election cycles, patterns reveal that turnout is not random; rather, it correlates closely with identifiable demographic factors. ***With the 2024 General Election quickly approaching, the imperative for Democrats is clear: to secure victory, they must consolidate a formidable voter base characterized by robust turnout.*** This necessitates a strategic approach that identifies and engages eligible voters within their base who have historically exhibited lower levels of electoral participation, such as young voters. By deploying targeted campaign tactics aimed at motivating these segments of the electorate, the Democratic campaign can bolster its presence at the polls on Election Day. Moreover, by prioritizing outreach to previously marginalized constituents, such as low-educated voters, Democrats can neutralize Republican advantages and tip the scales in their favor. Through these concerted efforts, Democrats can not only strengthen their electoral prospects but also uphold the foundational principles of representative democracy.
