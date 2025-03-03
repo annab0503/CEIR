@@ -169,9 +169,10 @@ img:hover {
 
 /* Section styling */
 #introduction.section.level1,
-#background.section.level1,
 #methodology.section.level1,
-#exploratory-analysis.section.level1,
+#trends-in-voter-turnout.section.level1,
+#trends-in-low-educated-voter-preferences.section.level1,
+#trends-in-young-voter-preferences.section.level1,
 #conclusion.section.level1,
 #works-cited.section.level1 {
     background-color: white; /* White background */

@@ -1,19 +1,69 @@
 ---
-title: "The Road to 270: Democratic Campaigning Strategy for the 2024 US General Election"
-author: "Anna Brown"
-date: "`r Sys.Date()`"
+title: 'The Road to 270: Democratic Campaigning Strategy for the 2024 US General Election'
+date: "April 23, 2024"
 output:
-     html_document:
-          toc: true
-          toc_depth: 2
-          toc_float: true
-          theme: cosmo
-          code_folding: hide
+  pdf_document:
+    toc: true
+    toc_depth: '3'
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: none
+    self_contained: false
+    css: styles.css
 ---
 
-# INTRODUCTION
-### *The Democratic Presidential campaign **must** establish their strategy to secure electoral victory.*
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+# Function to check and install missing packages
+install_if_missing <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    install.packages(package, dependencies = TRUE)
+    library(package, character.only = TRUE)
+  }
+}
 
+# List of required packages
+packages <- c(
+  "countrycode", "dplyr", "DT", "ggplot2", "gridExtra", "leaflet", 
+  "maps", "patchwork", "readr", "rworldmap", "showtext", 
+  "sp", "tidyverse"
+)
+
+# Ensure all packages are installed and loaded
+lapply(packages, install_if_missing)
+
+# Load libraries explicitly
+library(countrycode)
+library(dplyr)
+library(DT)
+library(ggplot2)
+library(gridExtra)
+library(leaflet)
+library(maps)
+library(patchwork)
+library(readr)
+library(rworldmap)
+library(showtext)
+library(sp)
+library(tidyverse)
+
+# Set the file path
+url <- "https://raw.githubusercontent.com/annab0503/CEIR/refs/heads/main/Writing%20Sample/Original%20Dataframes/2016-2022%20Validated%20Voter%20Detailed%20Tables%20-%20Sheet%201.csv"
+
+# Read the CSV file from the URL
+data <- read.csv(url, skip = 3)
+
+# Enable the showtext package
+showtext_auto()
+
+# Add Google Fonts
+font_add_google("Bodoni Moda", "bodoni_moda")  # Alias: bodoni_moda
+font_add_google("Montserrat", "montserrat")     # Alias: montserrat
+```
+
+# INTRODUCTION
+## *The Democratic Presidential campaign **must** establish their strategy to secure electoral victory.*
 Previous research shows that voter turnout shapes election outcomes. When voter turnout is high, it often indicates a high level of engagement and enthusiasm among the electorate, which can lead to more representative results. Conversely, low voter turnout can skew outcomes, as it may reflect apathy, disenchantment, or barriers to participation among certain demographics. Elections with low turnout rates risk being decided by a smaller, potentially less diverse subset of the population, which can distort the democratic process. Furthermore, variations in voter turnout across different regions or demographic groups can significantly impact the final results, influencing everything from the composition of legislative bodies to the outcome of specific ballot measures or initiatives. Therefore, understanding and addressing factors that affect voter turnout is essential for ensuring fair and representative democratic elections.
 
 By analyzing voting patterns from the previous four National election cycles (2016-2022), the Democratic Presidential campaign can obtain valuable insight on key voter demographics, including voter turnout and preferences, which can help information strategic decisions regarding messaging, campaign outreach, and policy priorities to effectively engage and mobilize supporters in the upcoming election.
@@ -21,7 +71,7 @@ By analyzing voting patterns from the previous four National election cycles (20
 Following the primary elections earlier this year, we are now certain that the 2024 Presidential Election will be a Biden-Trump rematch. While the political environment has changed since their previous face-off in 2020, we can gain valuable insight on general trends in among voter demographics. In a time of immense polarization where both candidates are are well-established incumbents, the Democratic campaign can not rely on vote flipping. *Therefore, with the U.S. General Election only about six months year away, **Democrats need to consolidate a strong voting base that will turn out to on election day if they want to ensure a win.***
 
 # METHODOLOGY
-Following each election, the Pew Research Center surveys U.S. adults online to study trends in voter turnout and choices. Using this survey data, I am analyzing subsets of voters with low voter turnout for general trends that may be expected to continue in 2024. I originally accessed this data on March 21, 2024.
+Following each election, the Pew Research Center surveys U.S. adults online to study trends in voter turnout and choices. Using this survey data, I am analyzing subsets of voters with low voter turnout for general trends that may be expected to continue in 2024.
 
 Variables in my (cleaned) dataset include:
 
@@ -42,25 +92,14 @@ The Pew Research Center's most recent report using this data can be found at [ww
 
 I originally accessed the survey data on March 21, 2024.
 
-## DATA CLEANING
-#### LOADING PACKAGES
-```{r message=FALSE}
-library(tidyverse)
-library(dplyr)
-library(patchwork)
-library(DT)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+data
 ```
-#### IMPORT ORIGINAL DATA
-```{r}
-# Set the file path
-file_path <- "/Users/annabrown/Desktop/Final Project/Original Dataframes/2016-2022 Validated Voter Detailed Tables - Sheet 1.csv"
 
-# Import rows 4 to 174 of the CSV file into R
-df <- read.csv(file_path, skip = 3, nrows = 171)
-```
-#### GENERAL CLEANING
-```{r}
-data <- df %>% #Use dplyr piping to clean data
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+# General Cleaning
+
+data <- data %>% #Use dplyr piping to clean data
   # Rename columns
   rename(
     "Type of Voter" = X,
@@ -147,8 +186,10 @@ for (i in 1:nrow(data)) {
   }
 }
 ```
-#### VISUALIZATION 1 CLEANING
-```{r}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+# VISUALIZATION 1 CLEANING
+
 gender_data <- rbind(subsets[["Gender"]], subsets[["Gender and race"]], subsets[["Gender and Marital"]], subsets[["Gender and education"]], subsets[["Gender and age"]]) 
 
 gender_data <- gender_data %>%
@@ -222,8 +263,10 @@ gender_data_final <- rbind(male_voters, female_voters)
 gender_data_final <- gender_data_final %>%
   select('Gender', everything())
 ```
-#### VISUALIZATION 2 CLEANING
-```{r}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+# VISUALIZATION 2 CLEANING
+
 age_data <- subsets[["Age (six-way)"]]
 age_data <- age_data %>%
   mutate(`Type of Voter` = ifelse(grepl("Age", `Type of Voter`), NA, `Type of Voter`)) %>%
@@ -276,8 +319,10 @@ colnames(data4) <- gsub("2022 ", "", colnames(data4))
 # Merge cleaned dataframes
 clean_age_data <- rbind(data1, data2, data3, data4)
 ```
-#### VISUALIZATION 3 CLEANING
-```{r}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results="hide"}
+# VISUALIZATION 3 CLEANING
+
 education_data <- subsets[["Education"]]
 education_data <- education_data %>%
   mutate(`Type of Voter` = ifelse(grepl("Education", `Type of Voter`), NA, `Type of Voter`)) %>%
@@ -331,162 +376,240 @@ colnames(data4) <- gsub("2022 ", "", colnames(data4))
 clean_education_data <- rbind(data1, data2, data3, data4)
 ```
 
-## TRENDS IN VOTER TURNOUT
-As evidenced by the chart below, voter turnout disparities are evident across racial, educational, and gender lines. Additionally, while there is some year-to-year variation, these trends have remained generally constant over the past four election cycles. In other words, voter turnout is *not* random.
-```{r}
-# Define the desired order of the legend items
-desired_order <- c("Total", "18-49", "50+", "Black, non-Hispanic", "White, non-Hispanic", "Hispanic", "some college or less", "college grad+", "not married", "married")
+# TRENDS IN VOTER TURNOUT
+As shown in the chart below, voter turnout disparities persist across racial, educational, and gender lines. While there is some variation from election to election, these trends have remained remarkably consistent over the past four election cycles. This indicates that voter turnout is *not* random but rather influenced by structural and demographic factors.
 
-# Define color scheme
+```{r fig.width=10, fig.height=6, echo=FALSE, warning=FALSE, message=FALSE}
+# Define the desired order of the legend items
+desired_order <- c("Total", "18-49", "50+", "Black, non-Hispanic", "White, non-Hispanic", 
+                   "Hispanic", "some college or less", "college grad+", "not married", "married")
+
+# Define your color scheme (unchanged)
 colors <- c("Total" = "#051224",
             "18-49" = "#C6342F",
-            "50+" = "#F84947", 
+            "50+" = "#F84947",
             "Black, non-Hispanic" = "#004AAD",
             "White, non-Hispanic" = "#4689D0",
             "Hispanic" = "#B1DFFC",
             "some college or less" = "#808080",
-            "college grad+" = "#ADADAD",    
-            "not married" = "#7C4A7A",    
-            "married" = "#BA8CB9") 
+            "college grad+" = "#ADADAD",
+            "not married" = "#7C4A7A",
+            "married" = "#BA8CB9")
 
-# Plot Total Nonvoter share per year, coloring by Type of Voter for female voters
-female_plot <- ggplot(female_voters, aes(x = Year, y = `Total Nonvoter Share`, color = factor(`Type of Voter`, levels = desired_order))) +
-  geom_line() +
-  labs(x = "Year", y = "Share of Nonvoters (%)", color = "Type of Voter") +
-  scale_color_manual(values = colors) +  # Apply color scheme
-  theme_minimal() +
+# Common Theme for Both Plots
+custom_theme <- theme_minimal() +
   theme(
-    text = element_text(family = "Georgia"),
-    legend.title = element_text(family = "Georgia", face = "bold", hjust = 0.5),
-    axis.title.x = element_text(face = "italic"),
-    axis.title.y = element_blank(),
-    panel.grid.major = element_blank(),  # Remove major grid lines
-    panel.grid.minor = element_blank(),   # Remove minor grid lines
-    plot.title = element_text(face = "italic", hjust = 0.5),  # Italicize and center the title
-    legend.position = "right",  # Adjust legend position
-    legend.box.background = element_rect(color = "black"),  # Add a box around the legend
-    legend.key.size = unit(0.5, "cm")  # Reduce legend size
-  ) +
-  guides(color = guide_legend(override.aes = list(size = 2))) +  # Adjust legend size
-  ggtitle("Female Voter Population")  # Add title
+    # Title and subtitle
+    plot.title = element_text(hjust = 0.5, family = "bodoni_moda", size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, family = "montserrat", size = 12),
+    
+    # Axis labels and text
+    axis.title = element_text(family = "montserrat", size = 14),
+    axis.text = element_text(family = "montserrat", size = 10),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    
+    # Background styling (white background to match previous graph)
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    
+    # Strip text for facets
+    strip.text = element_text(family = "montserrat", size = 12, face = "bold"),
+    
+    # Legend customization
+    legend.title = element_text(family = "bodoni_moda", size = 13, face = "bold"),
+    legend.text = element_text(family = "montserrat", size = 12),
+    legend.position = 'right',
+    legend.title.align = 0.5,
+    
+    # Margins
+    plot.margin = margin(20, 20, 20, 20)
+  )
 
-# Plot Total Nonvoter share per year, coloring by Type of Voter for male voters
-male_plot <- ggplot(male_voters, aes(x = Year, y = `Total Nonvoter Share`, color = factor(`Type of Voter`, levels = desired_order))) +
-  geom_line() +
+# Female Voter Population Plot
+female_plot <- ggplot(female_voters, aes(x = Year, y = `Total Nonvoter Share`, 
+                                         color = factor(`Type of Voter`, levels = desired_order))) +
+  geom_line(size = 1.2) +  # Match previous graph line thickness
+  geom_point(size = 2) +   # Add points for clarity
   labs(x = "Year", y = "Share of Nonvoters (%)", color = "Type of Voter") +
-  scale_color_manual(values = colors) +  # Apply political-type color scheme
-  theme_minimal() +
-  theme(
-    text = element_text(family = "Georgia"),
-    legend.title = element_text(family = "Georgia", face = "bold", hjust = 0.5),
-    axis.title.x = element_text(face = "italic"),
-    axis.title.y = element_text(face = "italic"),
-    panel.grid.major = element_blank(),  # Remove major grid lines
-    panel.grid.minor = element_blank(),   # Remove minor grid lines
-    plot.title = element_text(face = "italic", hjust = 0.5),  # Italicize and center the title
-    legend.position = "none"  # Remove legend
-  ) +
-  ggtitle("Male Voter Population")  # Add title
+  scale_color_manual(values = colors) +
+  custom_theme +
+  ggtitle("Female Voter Population")
 
-# Combine plots with patchwork, setting male_plot on the left and female_plot on the right
-patch <- male_plot + female_plot +
-  plot_layout(ncol = 2)  # Arrange plots in 2 columns
+# Male Voter Population Plot
+male_plot <- ggplot(male_voters, aes(x = Year, y = `Total Nonvoter Share`, 
+                                     color = factor(`Type of Voter`, levels = desired_order))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(x = "Year", y = "Share of Nonvoters (%)") +
+  scale_color_manual(values = colors) +
+  custom_theme +
+  theme(legend.position = "none") +  # Hide legend for male plot
+  ggtitle("Male Voter Population")
 
-# Add overall title with Georgia font and bold
-patch <- patch + plot_annotation(
-  title = "Nonvoters in U.S. Elections, 2016-2022",
-  theme = theme(plot.title = element_text(family = "Georgia", face = "bold"))
-)
+# Combine Plots with Patchwork
+patch <- male_plot + female_plot + 
+  plot_layout(ncol = 2) +
+  plot_annotation(
+    title = "Nonvoter Trends Remain Consistent Across Recent Elections",
+    theme = theme(plot.title = element_text(family = "bodoni_moda", size = 20, face = "bold", hjust = 0.5))
+  )
 
 # Display the patchwork
 patch
 ```
-Recognizing these demographic trends, the Democratic campaign has a strategic opportunity to solidify its voter base by employing targeted campaign tactics aimed at identifying and mobilizing nonvoters within their constituency. If demographic groups that generally have not voted in elections previously can be motivated to vote for the Democratic candidate in 2024, then the Democratic campaign can secure a stronger voting base without flipping votes.
 
-Specifically, this chart identifies young and low-educated individuals as the two largest shares of nonvoters, especially within the female population. *How do these groups vote?* 
+Recognizing these demographic trends, the Democratic campaign has a strategic opportunity to strengthen its voter base by targeting and mobilizing nonvoters. The data highlights that young and less-educated individuals consistently make up the largest share of nonvoters, particularly among women. Since these patterns have remained stable over multiple election cycles, campaigns must address the systemic barriers that prevent these groups from voting, such as lack of access to resources, political disengagement, and economic instability.
 
-## TRENDS IN LOW-EDUCATED VOTER PREFERENCES
-Voters with some college education or less have comprised the largest subgroup of nonvoters over the past four election cycles. However, voter turnout among this group did increase in 2022. 
-```{r warning=FALSE}
+As identified in an article by [PBS News](https://www.pbs.org/newshour/politics/voter-turnout-united-states?utm_source=chatgpt.com), several factors contribute to low voter turnout, including restrictive voting laws, lack of competitive elections, voter disillusionment, and logistical challenges. No single cause fully explaining the trend. However, to address these challenges and close the participation gap, campaigns can implement voter education efforts, grassroots organizing, and digital outreach strategies tailored to the demographics most heavily impacted. Addressing these obstacles could significantly increase turnout without necessarily needing to convert opposition voters.
+
+If the Democratic campaign successfully engages nonvoters in 2024, it could expand its electoral advantage by broadening its base. Understanding what motivates these groups to vote—whether through policy concerns, community-driven activism, or outreach from trusted sources—will be critical. Specifically, this chart identifies young and low-educated individuals as the two largest shares of nonvoters, especially within the female population. How do these groups vote when they do turn out?
+
+# TRENDS IN LOW-EDUCATED VOTER PREFERENCES
+Voters with some college education or less have consistently represented the largest subgroup of nonvoters over the past four election cycles. However, voter turnout among this group increased in 2022 increased, suggesting that engagement efforts may be beginning to have an effect. These demographic shifts point to a key opportunity for campaigns to target and mobilize nonvoters, especially those with lower levels of education, as a way to expand their base and increase turnout.
+
+```{r fig.width=10, fig.height=6, echo=FALSE, warning=FALSE, message=FALSE}
 # Filtering the data to include only voters with "Some college" or "HS or Less" education
 educ_subset <- clean_education_data %>%                 
-  filter(`Type of Voter` %in% c("HS or less","Some college")) %>%
+  filter(`Type of Voter` %in% c("HS or less", "Some college")) %>%
   # Calculating the percentage of "Other" votes
   mutate(`Other Vote` = 100 - `D Vote` - `R Vote`) %>%
   # Reshaping the data into longer format for plotting
-  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),  
+  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),   
                names_to = "Party", values_to = "Votes") %>%
   # Reordering the levels of the 'Party' factor variable
   mutate(Party = factor(Party, levels = c("Other Vote", "D Vote", "R Vote")))
 
-# Plotting
+# Plot
 ggplot(educ_subset, aes(x = Year, y = Votes, fill = Party)) +
   geom_bar(stat = "identity", position = "stack") +
-  geom_text(data = subset(educ_subset, Party != "Other Vote"), aes(label = paste0(round(Votes), "%")), 
-            position = position_stack(vjust = 0.5), size = 3, color = "white", fontface = "bold", family = "Georgia") + # Change text color to white, make it bold, and set font to Georgia
-  facet_wrap(~`Type of Voter`, scales = "free_y", labeller = labeller(`Type of Voter` = c("HS or less" = "High School or Less", "Some college" = "Some College"))) +
-  labs(title = "Party Preferences of Low-Educated Voters, 2016-2022",
-       x = "Year", y = "Share of Votes (%)", fill = "Party") +
-  scale_x_continuous(breaks = seq(min(educ_subset$Year), max(educ_subset$Year), by = 2)) +  # Setting breaks on the x-axis to even years
-  scale_fill_manual(values = c("#ADADAD", "#004AAD", "#F84947"), labels = c("Other", "Democrat", "Republican")) +
-  theme_minimal() +
-  theme(text = element_text(family = "Georgia"),
-        plot.title = element_text(face = "bold", hjust = 0),  # Align title on the left margin
-        axis.title.x = element_text(face = "italic"),
-        axis.title.y = element_text(face = "italic"),
-        legend.title = element_text(face = "bold"),
-        strip.text = element_text(size = 12, color = "black", face = "italic"),
-        panel.grid.major = element_blank(),  # Remove major grid lines
-        panel.grid.minor = element_blank(),  # Remove minor grid lines
-        legend.box.background = element_rect(color = "black", size = 0.3))  # Add a box around the legend
-```
-Measured by the stacked bar chart above, these voters, especially those with High School education or less, primarily support the Republican party. However, while the Republican party does appear to be gaining in margins across each cycle, this trend remains competitive. Additionally, given the Republican party only recently obtained a substantial majority among low-educated voters, this could be because low-educated voters who tend to support Democratic candidates are not actually voting on election day. Therefore, engaging with this group more through campaigning may help shift the trend towards the Democrats’ favor.
+  
+  # Labels inside bars (except "Other Vote" category)
+  geom_text(data = subset(educ_subset, Party != "Other Vote"), 
+            aes(label = paste0(round(Votes), "%")),  
+            position = position_stack(vjust = 0.5), 
+            size = 3, color = "white", fontface = "bold", 
+            family = "montserrat") + 
 
-## TRENDS IN YOUNG VOTER PREFERENCES
-Meanwhile, young voters, the second largest subgroup of nonvoters, are Democratic supporters. Given the next Presidential Election is a 2020 rematch, the bar chart below displays voter shares each candidate received from this subgroup in their last competition.
-```{r}
+  # Facet wrap with custom labels
+  facet_wrap(~`Type of Voter`, scales = "free_y", 
+             labeller = labeller(`Type of Voter` = c("HS or less" = "High School or Less", 
+                                                     "Some college" = "Some College"))) +
+
+  # Titles and Labels
+  labs(title = "Republican Gains Among Low-Educated Voters Stay Competitive",
+       x = "Year", y = "Share of Votes (%)", fill = "Party") +
+
+  # X-axis breaks for every 2 years
+  scale_x_continuous(breaks = seq(min(educ_subset$Year), max(educ_subset$Year), by = 2)) +
+
+  # Color scheme (unchanged)
+  scale_fill_manual(values = c("#ADADAD", "#004AAD", "#F84947"), 
+                    labels = c("Other", "Democrat", "Republican")) +
+
+  # Theme adjustments for consistency
+  theme_minimal() +
+  theme(
+    # Title and subtitle styling
+    plot.title = element_text(family = "bodoni_moda", size = 16, face = "bold", hjust = 0.5), 
+    
+    # Axis titles and text
+    axis.title = element_text(family = "montserrat", size = 14, face = "italic"),
+    axis.text = element_text(family = "montserrat", size = 10),
+    
+    # Panel background (set to white for consistency)
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+
+    # Facet strip text
+    strip.text = element_text(family = "montserrat", size = 12, face = "bold"),
+
+    # Legend adjustments
+    legend.title = element_text(family = "bodoni_moda", size = 13, face = "bold"),
+    legend.text = element_text(family = "montserrat", size = 12),
+    legend.position = "right"  # Legend on right, no box
+  )
+
+```
+
+The stacked bar chart above illustrates voting patterns among individuals with a high school education or less and those with some college education. The data shows that while these voters, particularly those with a high school education or less, predominantly support the Republican Party, the margin remains competitive across each election cycle. Although the Republican Party has gained ground among low-educated voters, the trend is not overwhelmingly one-sided. The Democratic Party still holds a substantial share of support, though turnout from this group remains an issue.
+
+Given that the Democratic Party traditionally receives more support from low-educated voters, especially those with high school education or less, the lack of turnout among these voters could explain the Republican Party's increasing dominance in this group. To address this, campaigns should focus on engaging these voters by targeting the root causes of political disengagement, such as economic instability, limited access to resources, and political disillusionment. By enhancing voter education efforts and increasing outreach to this demographic, the Democrats could shift the trend in their favor in future elections.
+
+# TRENDS IN YOUNG VOTER PREFERENCES
+Young voters, the second largest subgroup of nonvoters, are a key demographic that overwhelmingly supports the Democratic Party. As the next Presidential Election will be a rematch of 2020, it’s insightful to examine the voting patterns of this age group in the previous election. The bar chart below displays the voter shares each candidate received from young voters aged 18-49 in 2020, offering a glimpse into the Democratic advantage among this group.
+
+```{r fig.width=10, fig.height=6, echo=FALSE, warning=FALSE, message=FALSE}
+# Filtering the data for voters aged 18-49 in the 2020 election
 age_subset <- clean_age_data %>%                 
   filter(`Type of Voter` %in% c("18-24", "25-29", "30-39", "40-49")) %>%
-  filter(`Year` %in% c("2020"))  %>%
+  filter(`Year` %in% c("2020")) %>%
+  
   # Calculating the percentage of "Other" votes
   mutate(`Other Vote` = 100 - `D Vote` - `R Vote`) %>%
-  # Convert "D Vote" values to negative numbers
+  
+  # Convert "D Vote" values to negative numbers for visualization
   mutate(`D Vote` = -`D Vote`) %>%
-  # Reshaping the data into longer format for plotting
-  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),  
+  
+  # Reshaping the data into a longer format for plotting
+  pivot_longer(cols = c("D Vote", "R Vote", "Other Vote"),   
                names_to = "Party", values_to = "Votes") %>%
+  
   # Reordering the levels of the 'Party' factor variable
   mutate(Party = factor(Party, levels = c("Other Vote", "D Vote", "R Vote"))) %>%
+  
   # Add an "abs_votes" column with absolute values of "Votes"
   mutate(abs_votes = abs(Votes))
 
 # Stacked horizontal bar chart
 ggplot(age_subset, aes(x = factor(`Type of Voter`), y = Votes, fill = Party)) +
+  
+  # Bar chart
   geom_bar(stat = "identity") +
+  
+  # Labels inside bars (Only for D and R votes)
   geom_text(aes(label = ifelse(Party %in% c("D Vote", "R Vote"), paste0(abs_votes, "%"), "")),
-            position = position_stack(vjust = 0.5), color = "white", fontface = "bold",
-            family = "Georgia") + # Specify the font family here
-  labs(title = "Presidential Candidate Preferences of Young Voters, 2020",
+            position = position_stack(vjust = 0.5), 
+            color = "white", fontface = "bold", 
+            family = "montserrat") + 
+  
+  # Titles and Labels
+  labs(title = "Young Voters Favor the Democratic Party",
        x = "Age of Voter",
        y = "Share of Votes (%)",
-       fill = "Presidential Candidate") + # Changing the legend title
+       fill = "Presidential Candidate") + 
+  
+  # Theme adjustments for consistency
   theme_minimal() +
-  theme(legend.position = "right",
-        text = element_text(family = "Georgia", face = "plain"),
-        axis.text = element_text(family = "Georgia", face = "plain"),
-        axis.title = element_text(family = "Georgia", face = "italic"),
-        axis.text.x = element_text(color = "white"), # Change the x-axis text color to white
-        legend.text = element_text(family = "Georgia", face = "plain"),
-        legend.title = element_text(family = "Georgia", face = "bold"),
-        panel.grid.major = element_blank(), # Remove major grid lines
-        panel.grid.minor = element_blank(),
-        plot.title = element_text(family = "Georgia", face = "bold"),
-        legend.box.background = element_rect(color = "black", size = 0.3)) + # Add box around legend
+  theme(
+    # Title styling
+    plot.title = element_text(family = "bodoni_moda", size = 16, face = "bold", hjust = 0.5), 
+    
+    # Axis titles and text
+    axis.title = element_text(family = "montserrat", size = 14, face = "italic"),
+    axis.text = element_text(family = "montserrat", size = 10, color = "black"), # Ensuring black text for readability
+    
+    # Panel and background adjustments
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+
+    # Legend adjustments (No box)
+    legend.title = element_text(family = "bodoni_moda", size = 13, face = "bold"),
+    legend.text = element_text(family = "montserrat", size = 12),
+    legend.position = "right"  # Keep legend on the right
+  ) +
+  
+  # Flip the coordinates for horizontal bars
   coord_flip() +
+
+  # Custom fill colors (unchanged)
   scale_fill_manual(labels = c("Other", "Joe Biden", "Donald Trump"),
                     values = c("Other Vote" = "#ADADAD", "D Vote" = "#004AAD", "R Vote" = "#F84947"))
 ```
-Collectively, Democrats received majority support from all age groups between 18 and 49, however, their most overwhelming support came from newer voters — individuals likely voting in their first Presidential election — between 18 and 24 years old. By maintaing support from young voters through outreach programs, tailored messaging, and community organizing initiatives, the Democratic party can enhance voter participation, expand their voter base, and potentially tip the scales in their favor on election day.
+
+The chart highlights that, collectively, Democrats received majority support from all age groups between 18 and 49. However, the most significant support came from the youngest voters—those likely voting in their first Presidential election, aged 18-24. This group overwhelmingly backed Joe Biden, reflecting a strong preference for Democratic candidates.
+
+To build on this momentum and continue securing the support of young voters, the Democratic Party can invest in targeted outreach programs, develop tailored messaging that resonates with their values, and further engage in community organizing initiatives. By maintaining and expanding this base of support, the Democrats can boost voter participation, grow their voter base, and potentially gain a decisive advantage come election day.
 
 # CONCLUSION
-Across the last four election cycles, patterns reveal that turnout is not random; rather, it correlates closely with identifiable demographic factors. ***With the 2024 General Election quickly approaching, the imperative for Democrats is clear: to secure victory, they must consolidate a formidable voter base characterized by robust turnout.*** This necessitates a strategic approach that identifies and engages eligible voters within their base who have historically exhibited lower levels of electoral participation, such as young voters. By deploying targeted campaign tactics aimed at motivating these segments of the electorate, the Democratic campaign can bolster its presence at the polls on Election Day. Moreover, by prioritizing outreach to previously marginalized constituents, such as low-educated voters, Democrats can neutralize Republican advantages and tip the scales in their favor. Through these concerted efforts, Democrats can not only strengthen their electoral prospects but also uphold the foundational principles of representative democracy.
+Across the last four election cycles, patterns reveal that turnout is not random; rather, it correlates closely with identifiable demographic factors. ***With the 2024 General Election quickly approaching, the imperative for Democrats is clear: to secure victory, they must consolidate a formidable voter base characterized by robust turnout.*** This necessitates a strategic approach that identifies and engages eligible voters within their base who have historically exhibited lower levels of electoral participation, such as young voters. By deploying targeted campaign tactics aimed at motivating these segments of the electorate, the Democratic campaign can bolster its presence at the polls on Election Day. Additionally, by prioritizing outreach to previously marginalized constituents, such as low-educated voters, can help neutralize Republican advantages and potentially shift the balance in the Democrats' favor. Through these concerted efforts, Democrats can not only strengthen their electoral prospects but also uphold the foundational principles of representative democracy.
